@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Steganografia</title>
+		<style>
+			body, html {margin:0;padding:0;font-family:Arial,sans-serif;color:#717171;}
+			h1 {color:black;margin-bottom:10px;}
+			#main {position:relative;width:940px;padding:20px;margin:auto;background-color: #EEE;}
+			#right {position:relative;float:left;margin: 10px;width:600px;vertical-align:top;}
+			#left {position:relative;float:left;width:260px;padding:10px;margin-right:10px;background-color:#DDD;}
+			.half {position:relative;display:inline-block;width:49%;}
+			#original {vertical-align:top;}
+			#messageArea {width:100%;}
+			#img, #cover {width:290px;}
+			.btns {margin-top:15px;margin-bottom:10px;padding: 0 40px;padding-left: 10px;}
+			.btn {padding:10px 20px 10px 20px;border-radius:15px;border:2px solid #444;cursor:pointer;color:#444;background-color:white;width:50px;text-align:center;}
+			.btn:hover {color:white;background-color:#444;}
+			#download {position:absolute;top:47px;left:4px;padding:10px 5px 5px 3px;width:90px;border-top:1px solid black;border-radius:0 0 15px 15px;text-decoration:none;}
+			#description {line-height:25px;padding-bottom:5px;border-bottom:1px solid lightgrey;}
+			#capacity {font-weight:normal;font-size:15px;margin-left:10px;vertical-align:middle;}
+			.note {font-size:9px;text-align:center;color:black;}
+			.invisible {visibility:hidden;}
+			.clear {clear:both;}
+			.footer {margin-top:25px;width:100%;text-align:right;}
+			textarea{width:228px;padding:10px;height:200px;resize:none;}
+			h2{margin-top:0;}
+		</style>
+	</head>
+	<body>
+		<div id="main">
+			<h1 style="text-align:center">Steganografia by Amalia Vittoria Montemurro</h1>
+			<div style="text-align:center" id="description">Questo sito fa al steganografia di un'immagine</div>
+			<div id="left">
+				<h2>Carica immagine:</h2>
+				<input id="file" type="file"/>
+        <br/>
+        <br/>
+				<h2>Payload:<span id="capacity"></span></h2>
+				<textarea id="text" placeholder="Inserisci il testo"></textarea>
+				<div class="btns">
+					<span id="hide" class="btn">Nascondi</span>
+					<span id="read" class="btn">Mostra</span>
+				</div>
+			</div>
+			<div id="right">
+				<div id="original" class="half">
+					<h2>Immagine caricata:</h2>
+					<img id="img" src=""/>
+				</div>
+				<div id="stego" class="half">
+					<h2>Immagine generata:</h2>
+					<img id="cover" src=""/>
+					<a id="download" class="btn small" download="cover.png" rel="nofollow"><strong>Scarica l'immagine</strong></a>
+				</div>
+				<div id="messageArea" class="invisible">
+					<h2>Payload:</h2>
+					<div id="message"></div>
+				</div>
+			</div>
+			<div class="clear"></div>
+		</div>
+		<script type="text/javascript" src="steganography.js"></script>
+		<script type="text/javascript">
+
+		function handleFileSelect(evt) {
+			var original = document.getElementById("original"),
+				stego = document.getElementById("stego"),
+				img = document.getElementById("img"),
+				cover = document.getElementById("cover"),
+				message = document.getElementById("message");
+			if(!original || !stego) return;
+
+			var files = evt.target.files; // FileList object
+
+			// Loop through the FileList and render image files as thumbnails.
+			for (var i = 0, f; f = files[i]; i++) {
+
+				// Only process image files.
+				if (!f.type.match('image.*')) {
+					continue;
+				}
+
+				var reader = new FileReader();
+
+				// Closure to capture the file information.
+				reader.onload = (function(theFile) {
+					return function(e) {
+						img.src = e.target.result;
+						img.title = escape(theFile.name);
+						stego.className = "half invisible";
+						cover.src = "";
+						message.innerHTML="";
+						message.parentNode.className="invisible";
+						updateCapacity();
+					};
+				})(f);
+
+				// Read in the image file as a data URL.
+				reader.readAsDataURL(f);
+			}
+		}
+
+		function hide() {
+			var stego = document.getElementById("stego"),
+				img = document.getElementById("img"),
+				cover = document.getElementById("cover"),
+				message = document.getElementById("message"),
+				textarea = document.getElementById("text"),
+				download = document.getElementById("download");
+			if(img && textarea) {
+				cover.src = steg.encode(textarea.value, img);
+				stego.className = "half";
+				message.innerHTML="";
+				message.parentNode.className="invisible";
+				download.href=cover.src.replace("image/png", "image/octet-stream");
+			}
+		}
+
+		function read() {
+			var img = document.getElementById("img"),
+				cover = document.getElementById("cover"),
+				message = document.getElementById("message"),
+				textarea = document.getElementById("text");
+			if(img && textarea) {
+				message.innerHTML = steg.decode(img);
+				if(message.innerHTML !== "") {
+					message.parentNode.className="";
+					textarea.value = message.innerHTML;
+					updateCapacity();
+				}
+			}
+		}
+
+		function updateCapacity() {
+			var img = document.getElementById('img'),
+				textarea = document.getElementById('text');
+			if(img && text)
+				document.getElementById('capacity').innerHTML='('+textarea.value.length + '/' + steg.getHidingCapacity(img) +' chars)';
+		}
+
+		window.onload = function(){
+			document.getElementById('file').addEventListener('change', handleFileSelect, false);
+			document.getElementById('hide').addEventListener('click', hide, false);
+			document.getElementById('read').addEventListener('click', read, false);
+			document.getElementById('text').addEventListener('keyup', updateCapacity, false);
+			hide();
+			updateCapacity();
+		};
+		</script>
+	</body>
+</html>
